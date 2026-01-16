@@ -1,0 +1,15 @@
+input: ./input.jar
+output: ./output.jar
+libs:
+  - ./libs
+target:
+  - WINDOWS_X86_64
+  - LINUX_X86_64
+includes:
+  -
+excludes:
+  -
+obfuscation:
+  stringEncryption: false
+  flowObfuscation: false
+  antiDebug: true
