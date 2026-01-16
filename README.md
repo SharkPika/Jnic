@@ -52,7 +52,6 @@ obfuscation:
   stringEncryption: true
   flowObfuscation: false
   antiDebug: true
-  level: 1
 ```
 
 说明：
