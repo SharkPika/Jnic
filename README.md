@@ -87,10 +87,10 @@ flowchart LR
   B --> C[NativeProcessor 扫描/筛选方法]
   C --> D[CGenerator 生成 native-lib.c]
   D --> E[ZigCompiler 交叉编译多目标动态库]
-  E --> F[打包为 cn/sky/jnic/uuid.dat (XOR)]
+  E --> F[打包为 cn/sky/jnic/uuid.dat]
   F --> G[SkyJarLoader 写出 output.jar]
   G --> H[运行期 JNICLoader 解包 + System.load]
-  H --> I[registerNatives(clazz)]
+  H --> I[registerNatives(class)]
 ```
 
 ---
