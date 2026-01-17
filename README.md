@@ -90,7 +90,7 @@ flowchart LR
   E --> F[打包为 cn/sky/jnic/uuid.dat]
   F --> G[SkyJarLoader 写出 output.jar]
   G --> H[运行期 JNICLoader 解包 + System.load]
-  H --> I[registerNatives(class)]
+  H --> I[registerNatives（class）]
 ```
 
 ---
