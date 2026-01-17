@@ -13,7 +13,6 @@ import org.objectweb.asm.tree.analysis.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -90,21 +89,6 @@ public class CGenerator {
 
     // Buffer for method implementations
     private final StringBuilder methodImplementations = new StringBuilder();
-
-    private static long fnv1a64(byte[] data) {
-        long hash = 0xcbf29ce484222325L;
-        for (byte b : data) {
-            hash ^= (b & 0xFFL);
-            hash *= 0x100000001b3L;
-        }
-        return hash;
-    }
-
-    private static String buildNativeFunctionName(String ownerInternalName, String methodName, String methodDesc) {
-        String key = ownerInternalName + "\n" + methodName + "\n" + methodDesc;
-        long hash = fnv1a64(key.getBytes(StandardCharsets.UTF_8));
-        return "native_" + Long.toUnsignedString(hash, 16);
-    }
 
     private String getHelperFunctions() {
         return """
@@ -464,7 +448,10 @@ public class CGenerator {
 
     public String generateMethod(ClassWrapper owner, MethodWrapper method) {
         StringBuilder methodBody = new StringBuilder();
-        String functionName = buildNativeFunctionName(owner.getName(), method.getOriginalName(), method.getOriginalDescriptor());
+        // Use hex string to avoid negative hash code issues and ensure valid C
+        // identifier
+        String functionName = "native_" + Integer.toHexString(method.getOriginalName().hashCode()) + "_"
+                + Integer.toHexString(owner.getName().hashCode());
         Type returnType = Type.getReturnType(method.getOriginalDescriptor());
 
         // Method Signature
@@ -586,7 +573,7 @@ public class CGenerator {
         String fullCode = methodBody.toString();
         methodImplementations.append(fullCode); // Append to buffer instead of globalCode
 
-        generatedMethods.put(owner.getName() + "_" + method.getOriginalName() + "_" + method.getOriginalDescriptor(), functionName);
+        generatedMethods.put(owner.getName() + "_" + method.getOriginalName(), functionName);
         nativeEntries.add(new NativeEntry(owner.getName(), method.getOriginalName(), method.getOriginalDescriptor(),
                 functionName, method.isStatic()));
 
@@ -1744,7 +1731,9 @@ public class CGenerator {
                 if (canDirectCall && isNativeTarget
                         && !methodName.startsWith("<") && !methodName.startsWith("indy_wrapper_")) {
                     // Direct Call
-                    String cFunc = buildNativeFunctionName(ownerClass, methodName, methodDesc);
+                    // Use hex string here too
+                    String cFunc = "native_" + Integer.toHexString(methodName.hashCode()) + "_"
+                            + Integer.toHexString(ownerClass.hashCode());
 
                     if (!isStatic) {
                         code.append("    jobject obj_").append(methodHash).append(";\n");

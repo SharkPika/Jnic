@@ -24,7 +24,6 @@ public class Jnic {
     private final SkyJarLoader loader;
     private final NativeProcessor processor;
 
-    public final File configFile;
     public final Config config;
 
     public final Map<String, ClassWrapper> classes;
@@ -42,8 +41,7 @@ public class Jnic {
             this.tmpdir.mkdirs();
         }
 
-        this.configFile = new File("config.yml");
-        this.config = new Config(YamlConfiguration.loadConfiguration(this.configFile));
+        this.config = new Config();
 
         this.classes = new HashMap<>();
         this.classpath = new HashMap<>();

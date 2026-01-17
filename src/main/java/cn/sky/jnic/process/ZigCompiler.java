@@ -5,8 +5,6 @@ import cn.sky.jnic.Jnic;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,17 +27,17 @@ public class ZigCompiler {
     }
 
     private static String mapTargetToZig(String configTarget) {
-        switch (configTarget) {
-            case "WINDOWS_X86_64": return "x86_64-windows";
-            case "LINUX_X86_64": return "x86_64-linux";
-            case "MACOS_X86_64": return "x86_64-macos";
-            case "MACOS_ARM64": return "aarch64-macos";
-            case "ANDROID_ARM64": return "aarch64-linux-android";
-            case "ANDROID_ARM32": return "arm-linux-androideabi";
-            case "ANDROID_X86": return "x86-linux-android";
-            case "ANDROID_X86_64": return "x86_64-linux-android";
-            default: return null;
-        }
+        return switch (configTarget) {
+            case "WINDOWS_X86_64" -> "x86_64-windows";
+            case "LINUX_X86_64" -> "x86_64-linux-gnu";
+            case "MACOS_X86_64" -> "x86_64-macos";
+            case "MACOS_ARM64" -> "aarch64-macos";
+            case "ANDROID_ARM64" -> "aarch64-linux-android";
+            case "ANDROID_ARM32" -> "arm-linux-androideabi";
+            case "ANDROID_X86" -> "x86-linux-android";
+            case "ANDROID_X86_64" -> "x86_64-linux-android";
+            default -> null;
+        };
     }
 
     private static File findZigExecutable() {
@@ -110,28 +108,7 @@ public class ZigCompiler {
             if (target.contains("windows")) ext = ".dll";
             else if (target.contains("macos")) ext = ".dylib";
             
-            String arch;
-            int dashIndex = target.indexOf('-');
-            if (dashIndex > 0) {
-                arch = target.substring(0, dashIndex);
-            } else {
-                arch = target;
-            }
-
-            String platform;
-            if (target.contains("windows")) {
-                platform = "windows";
-            } else if (target.contains("macos")) {
-                platform = "macos";
-            } else if (target.contains("android") || target.contains("androideabi")) {
-                platform = "android";
-            } else if (target.contains("linux")) {
-                platform = "linux";
-            } else {
-                platform = "unknown";
-            }
-
-            File outFile = new File(outputDir, "libjnic_" + arch + "-" + platform + ext);
+            File outFile = new File(outputDir, "libjnic_" + target + ext);
             
             List<String> command = new ArrayList<>();
             command.add(zigPath);
@@ -153,6 +130,7 @@ public class ZigCompiler {
             // zig cc handles it mostly, but let's be safe or conditional
             if (target.contains("linux")) {
                 command.add("-s");
+                command.add("-lc");
             }
             
             // Link JNI headers? Zig usually bundles them or we need to provide include path

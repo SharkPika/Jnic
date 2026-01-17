@@ -1,24 +1,9 @@
 package cn.sky.jnic.utils.time;
 
-import lombok.AllArgsConstructor;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * @Author: EmptyIrony
- * @Date: 2021/1/19 15:30
- */
-
-@AllArgsConstructor
-public class Duration {
-
-    public static void main(String[] args) {
-        System.out.println(Duration.fromString("1h30m").getValue());
-    }
-
-    private final long value;
-
+public record Duration(long value) {
     public static Duration fromString(String source) {
         if (source.equalsIgnoreCase("perm") || source.equalsIgnoreCase("permanent")) {
             return new Duration(Integer.MAX_VALUE);
@@ -34,41 +19,37 @@ public class Duration {
             String type = s.split("(?<=\\D)(?=\\d)|(?<=\\d)(?=\\D)")[1];
 
             switch (type) {
-                case "s":
+                case "s" -> {
                     totalTime += value;
                     found = true;
-                    break;
-                case "m":
+                }
+                case "m" -> {
                     totalTime += value * 60;
                     found = true;
-                    break;
-                case "h":
+                }
+                case "h" -> {
                     totalTime += value * 60 * 60;
                     found = true;
-                    break;
-                case "d":
+                }
+                case "d" -> {
                     totalTime += value * 60 * 60 * 24;
                     found = true;
-                    break;
-                case "w":
+                }
+                case "w" -> {
                     totalTime += value * 60 * 60 * 24 * 7;
                     found = true;
-                    break;
-                case "M":
+                }
+                case "M" -> {
                     totalTime += value * 60 * 60 * 24 * 30;
                     found = true;
-                    break;
-                case "y":
+                }
+                case "y" -> {
                     totalTime += value * 60 * 60 * 24 * 365;
                     found = true;
-                    break;
+                }
             }
         }
 
         return new Duration(!found ? -1 : totalTime * 1000);
-    }
-
-    public long getValue() {
-        return this.value;
     }
 }
